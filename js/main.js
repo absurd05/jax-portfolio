@@ -413,7 +413,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await resp.json();
 
       if (data.code === 0) {
-        msgStatus.textContent = '✅ 留言已发送！我会尽快回复你';
+        msgStatus.textContent = '✅ 留言已送达！若留下联系方式，我会主动联系你';
         msgStatus.className = 'msg-status success';
         msgForm.reset();
       } else {
