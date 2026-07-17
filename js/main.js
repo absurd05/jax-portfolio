@@ -370,6 +370,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const msgStatus = document.getElementById('msgStatus');
   const msgSubmit = document.getElementById('msgSubmit');
 
+  // Counters
+  const visitEl = document.getElementById('visitCount');
+  const msgCountEl = document.getElementById('msgCount');
+  const COUNTER_BASE = 'https://api.countapi.xyz';
+
+  // Load visitor count
+  fetch(`${COUNTER_BASE}/hit/jax-portfolio/visits`)
+    .then(r => r.json()).then(d => { visitEl.textContent = d.value; })
+    .catch(() => { visitEl.textContent = '∞'; });
+
+  // Load message count
+  fetch(`${COUNTER_BASE}/get/jax-portfolio/messages`)
+    .then(r => r.json()).then(d => { msgCountEl.textContent = d.value || 0; })
+    .catch(() => { msgCountEl.textContent = '…'; });
+
   msgForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -416,6 +431,10 @@ document.addEventListener('DOMContentLoaded', () => {
         msgStatus.textContent = '✅ 留言已送达！若留下联系方式，我会主动联系你';
         msgStatus.className = 'msg-status success';
         msgForm.reset();
+        // Increment message counter
+        fetch(`${COUNTER_BASE}/hit/jax-portfolio/messages`)
+          .then(r => r.json()).then(d => { msgCountEl.textContent = d.value; })
+          .catch(() => {});
       } else {
         throw new Error(data.message || '发送失败');
       }

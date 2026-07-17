@@ -598,6 +598,24 @@ a { color: inherit; text-decoration: none; }
 }
 .msg-header p { color: var(--text-muted); font-size: 0.9rem; }
 
+.msg-stats {
+  display: flex; align-items: center; justify-content: center; gap: 16px;
+  margin-bottom: 28px; padding: 12px 28px;
+  background: rgba(0, 229, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 40px;
+  width: fit-content; margin-left: auto; margin-right: auto;
+}
+.stat-badge {
+  font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);
+  letter-spacing: 0.06em;
+}
+.stat-badge b {
+  color: var(--cyan); font-weight: 700;
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
+}
+.stat-divider { color: var(--border); font-size: 0.75rem; user-select: none; }
+
 .msg-form { padding: 36px; }
 .msg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
 
