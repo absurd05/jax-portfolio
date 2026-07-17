@@ -373,16 +373,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // Counters
   const visitEl = document.getElementById('visitCount');
   const msgCountEl = document.getElementById('msgCount');
-  const COUNTER_BASE = 'https://api.countapi.xyz';
+  const COUNTER_BASE = 'https://api.counterapi.dev/v1/jax-portfolio';
 
   // Load visitor count
-  fetch(`${COUNTER_BASE}/hit/jax-portfolio/visits`)
-    .then(r => r.json()).then(d => { visitEl.textContent = d.value; })
+  fetch(`${COUNTER_BASE}/visits/up`)
+    .then(r => r.json()).then(d => { visitEl.textContent = d.count; })
     .catch(() => { visitEl.textContent = '∞'; });
 
   // Load message count
-  fetch(`${COUNTER_BASE}/get/jax-portfolio/messages`)
-    .then(r => r.json()).then(d => { msgCountEl.textContent = d.value || 0; })
+  fetch(`${COUNTER_BASE}/messages`)
+    .then(r => r.json()).then(d => { msgCountEl.textContent = d.count || 0; })
     .catch(() => { msgCountEl.textContent = '…'; });
 
   msgForm.addEventListener('submit', async (e) => {
@@ -432,8 +432,8 @@ document.addEventListener('DOMContentLoaded', () => {
         msgStatus.className = 'msg-status success';
         msgForm.reset();
         // Increment message counter
-        fetch(`${COUNTER_BASE}/hit/jax-portfolio/messages`)
-          .then(r => r.json()).then(d => { msgCountEl.textContent = d.value; })
+        fetch(`${COUNTER_BASE}/messages/up`)
+          .then(r => r.json()).then(d => { msgCountEl.textContent = d.count; })
           .catch(() => {});
       } else {
         throw new Error(data.message || '发送失败');
