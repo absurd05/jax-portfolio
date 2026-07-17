@@ -576,6 +576,78 @@ a { color: inherit; text-decoration: none; }
 .copy-btn.copied { background: var(--green); color: var(--bg-deep); border-color: var(--green); }
 
 /* ============================================
+   MESSAGE FORM
+   ============================================ */
+.message-section {
+  margin-top: 64px; padding-top: 48px;
+  border-top: 1px solid var(--border);
+  max-width: 700px; margin-left: auto; margin-right: auto;
+}
+
+.msg-header { text-align: center; margin-bottom: 36px; }
+.msg-num {
+  display: block; font-family: var(--font-mono); font-size: 0.72rem;
+  color: var(--cyan); letter-spacing: 0.25em; margin-bottom: 8px;
+}
+.msg-header h3 {
+  font-size: 1.6rem; font-weight: 700; letter-spacing: 0.03em; margin-bottom: 6px;
+}
+.msg-header h3 small {
+  font-size: 0.5em; font-weight: 400; color: var(--text-muted);
+  display: block; margin-top: 4px;
+}
+.msg-header p { color: var(--text-muted); font-size: 0.9rem; }
+
+.msg-form { padding: 36px; }
+.msg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+
+.msg-field { position: relative; margin-bottom: 4px; }
+.msg-field.full { margin-bottom: 24px; }
+
+.msg-field label {
+  display: block; font-family: var(--font-mono); font-size: 0.72rem;
+  color: var(--text-muted); letter-spacing: 0.1em; margin-bottom: 8px;
+  text-transform: uppercase;
+}
+.msg-field label span { color: var(--cyan); }
+
+.msg-field input,
+.msg-field textarea {
+  width: 100%; padding: 14px 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--font-sans); font-size: 0.95rem;
+  outline: none; transition: var(--transition);
+  resize: vertical;
+}
+.msg-field input:focus,
+.msg-field textarea:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.1);
+  background: rgba(0, 229, 255, 0.03);
+}
+.msg-field input::placeholder,
+.msg-field textarea::placeholder { color: rgba(138, 160, 192, 0.4); }
+
+.msg-submit {
+  width: 100%; justify-content: center; padding: 16px 32px;
+  font-size: 0.95rem; letter-spacing: 0.12em;
+}
+.msg-submit:disabled { opacity: 0.5; pointer-events: none; }
+
+/* Status messages */
+.msg-status {
+  margin-top: 16px; text-align: center; font-family: var(--font-mono);
+  font-size: 0.82rem; min-height: 24px;
+  transition: var(--transition);
+}
+.msg-status.success { color: var(--green); }
+.msg-status.error { color: var(--magenta); }
+.msg-status.sending { color: var(--cyan); }
+
+/* ============================================
    FOOTER
    ============================================ */
 .footer {
@@ -676,6 +748,7 @@ a { color: inherit; text-decoration: none; }
   .side-nav { display: none; }
   .hero-stats { gap: 28px; }
   .interest-grid { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+  .msg-row { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 480px) {

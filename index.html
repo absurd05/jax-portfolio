@@ -257,6 +257,39 @@
           </a>
         </div>
       </div>
+
+      <!-- 留言表单 -->
+      <div class="message-section reveal-up">
+        <div class="msg-header">
+          <span class="msg-num">// 05.1</span>
+          <h3>给我留言 <small>Leave a Message</small></h3>
+          <p>有什么想说的？留言会实时推送到我的微信 📲</p>
+        </div>
+        <form class="msg-form glass" id="msgForm">
+          <div class="msg-row">
+            <div class="msg-field">
+              <label for="msgName">你的名字 <span>*</span></label>
+              <input type="text" id="msgName" placeholder="怎么称呼你？" required />
+              <span class="field-border"></span>
+            </div>
+            <div class="msg-field">
+              <label for="msgContact">联系方式</label>
+              <input type="text" id="msgContact" placeholder="邮箱 / 微信 / 手机（选填）" />
+              <span class="field-border"></span>
+            </div>
+          </div>
+          <div class="msg-field full">
+            <label for="msgContent">留言内容 <span>*</span></label>
+            <textarea id="msgContent" rows="4" placeholder="写下你想说的…" required></textarea>
+            <span class="field-border"></span>
+          </div>
+          <button type="submit" class="btn btn-primary msg-submit" id="msgSubmit">
+            <span>发送留言</span>
+            <i class="arrow">→</i>
+          </button>
+        </form>
+        <div class="msg-status" id="msgStatus"></div>
+      </div>
     </section>
   </main>
 

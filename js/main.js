@@ -363,6 +363,78 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* ========================================
+     10.5 MESSAGE FORM — Server酱 WeChat Push
+     ======================================== */
+  const SERVER_KEY = 'SCT380582TOENXFgDOpgWxmDwiidfJuqvN';
+  const msgForm = document.getElementById('msgForm');
+  const msgStatus = document.getElementById('msgStatus');
+  const msgSubmit = document.getElementById('msgSubmit');
+
+  msgForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById('msgName').value.trim();
+    const contact = document.getElementById('msgContact').value.trim();
+    const content = document.getElementById('msgContent').value.trim();
+
+    if (!name || !content) {
+      msgStatus.textContent = '⚠ 请填写名字和留言内容';
+      msgStatus.className = 'msg-status error';
+      return;
+    }
+
+    // Disable form
+    msgSubmit.disabled = true;
+    msgSubmit.innerHTML = '<span>发送中…</span>';
+    msgStatus.textContent = '📡 正在发送…';
+    msgStatus.className = 'msg-status sending';
+
+    const desp = [
+      `### 👤 来自：${escapeMd(name)}`,
+      contact ? `### 📞 联系方式：${escapeMd(contact)}` : '',
+      `### 💬 留言内容：`,
+      `> ${escapeMd(content)}`,
+      '',
+      `---`,
+      `⏰ 时间：${new Date().toLocaleString('zh-CN')}`,
+      `🌐 来源：jax.me.com`,
+    ].filter(Boolean).join('\n\n');
+
+    try {
+      const resp = await fetch(`https://sctapi.ftqq.com/${SERVER_KEY}.send`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: `💬 新留言 from ${name}`,
+          desp: desp,
+        }),
+      });
+
+      const data = await resp.json();
+
+      if (data.code === 0) {
+        msgStatus.textContent = '✅ 留言已发送！我会尽快回复你';
+        msgStatus.className = 'msg-status success';
+        msgForm.reset();
+      } else {
+        throw new Error(data.message || '发送失败');
+      }
+    } catch (err) {
+      msgStatus.textContent = '❌ 网络波动，请稍后再试';
+      msgStatus.className = 'msg-status error';
+      console.error('MSG send error:', err);
+    }
+
+    // Re-enable form
+    msgSubmit.disabled = false;
+    msgSubmit.innerHTML = '<span>发送留言</span><i class="arrow">→</i>';
+  });
+
+  function escapeMd(text) {
+    return text.replace(/[\\*_#~|`>{}()[\]+\-.!]/g, '\\$&');
+  }
+
+  /* ========================================
      11. COUNTER ANIMATION
      ======================================== */
   const counters = document.querySelectorAll('.count[data-target]');
