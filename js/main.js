@@ -534,4 +534,159 @@ document.addEventListener('DOMContentLoaded', () => {
      ======================================== */
   updateActiveSection();
 
+  /* ========================================
+     16. MUSIC PLAYER — Web Audio Ambient Synth
+     ======================================== */
+  const mp = document.getElementById('musicPlayer');
+  const mpToggle = document.getElementById('mpToggle');
+  const mpPlay = document.getElementById('mpPlay');
+  const mpVolume = document.getElementById('mpVolume');
+  const mpPanel = document.getElementById('mpPanel');
+  const mpVisCanvas = document.getElementById('mpVisualizer');
+  const mpVisCtx = mpVisCanvas.getContext('2d');
+
+  let audioCtx = null;
+  let masterGain = null;
+  let analyser = null;
+  let oscillators = [];
+  let isPlaying = false;
+  let visAnimId = null;
+
+  // Resize visualizer canvas
+  function resizeVis() {
+    const rect = mpVisCanvas.getBoundingClientRect();
+    mpVisCanvas.width = rect.width * devicePixelRatio;
+    mpVisCanvas.height = rect.height * devicePixelRatio;
+  }
+
+  // Create audio graph
+  function createAudio() {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = mpVolume.value / 100 * 0.35;
+    masterGain.connect(audioCtx.destination);
+
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 64;
+    analyser.smoothingTimeConstant = 0.8;
+    masterGain.connect(analyser);
+
+    // Ambient pad: layered detuned sines
+    const freqs = [
+      { f: 55, gain: 0.06 },   // A1
+      { f: 110, gain: 0.05 },  // A2
+      { f: 164.8, gain: 0.04 },// E3
+      { f: 220, gain: 0.03 },  // A3
+      { f: 277.2, gain: 0.02 },// C#4
+    ];
+
+    freqs.forEach(({ f, gain: g }) => {
+      const osc = audioCtx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = f;
+      osc.detune.value = (Math.random() * 6) - 3;
+
+      const gainNode = audioCtx.createGain();
+      gainNode.gain.value = g;
+
+      // Subtle LFO for movement
+      const lfo = audioCtx.createOscillator();
+      const lfoGain = audioCtx.createGain();
+      lfo.frequency.value = 0.03 + Math.random() * 0.04;
+      lfoGain.gain.value = g * 0.3;
+      lfo.connect(lfoGain);
+      lfoGain.connect(gainNode.gain);
+      lfo.start();
+
+      osc.connect(gainNode);
+      gainNode.connect(masterGain);
+      osc.start();
+
+      oscillators.push({ osc, gain: gainNode, lfo, lfoGain });
+    });
+  }
+
+  function destroyAudio() {
+    oscillators.forEach(({ osc, lfo }) => { try { osc.stop(); lfo.stop(); } catch(e){} });
+    oscillators = [];
+    if (audioCtx) { audioCtx.close(); audioCtx = null; }
+    masterGain = null; analyser = null;
+  }
+
+  // Toggle play/pause
+  function togglePlay() {
+    if (isPlaying) {
+      destroyAudio();
+      isPlaying = false;
+      mp.classList.remove('playing');
+      mpPlay.textContent = '▶';
+      if (visAnimId) { cancelAnimationFrame(visAnimId); visAnimId = null; }
+      mpVisCtx.clearRect(0, 0, mpVisCanvas.width, mpVisCanvas.height);
+    } else {
+      createAudio();
+      isPlaying = true;
+      mp.classList.add('playing');
+      mpPlay.textContent = '⏸';
+      resizeVis();
+      drawVisualizer();
+    }
+  }
+
+  // Spectrum visualizer
+  function drawVisualizer() {
+    if (!isPlaying || !analyser) { visAnimId = null; return; }
+
+    const w = mpVisCanvas.width;
+    const h = mpVisCanvas.height;
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    analyser.getByteFrequencyData(dataArray);
+
+    mpVisCtx.clearRect(0, 0, w, h);
+
+    const barW = w / bufferLength;
+    let x = 0;
+
+    for (let i = 0; i < bufferLength; i++) {
+      const barH = (dataArray[i] / 255) * h;
+      const alpha = 0.3 + (dataArray[i] / 255) * 0.7;
+
+      const gradient = mpVisCtx.createLinearGradient(x, h, x, h - barH);
+      gradient.addColorStop(0, `rgba(168,85,247,0)`);
+      gradient.addColorStop(1, `rgba(168,85,247,${alpha})`);
+
+      mpVisCtx.fillStyle = gradient;
+      mpVisCtx.fillRect(x, h - barH, barW - 1, barH);
+      x += barW;
+    }
+
+    visAnimId = requestAnimationFrame(drawVisualizer);
+  }
+
+  // Button events
+  mpToggle.addEventListener('click', () => {
+    mp.classList.toggle('expanded');
+    if (mp.classList.contains('expanded')) {
+      resizeVis();
+    }
+  });
+
+  mpPlay.addEventListener('click', (e) => {
+    e.stopPropagation();
+    togglePlay();
+  });
+
+  mpVolume.addEventListener('input', () => {
+    if (masterGain) {
+      masterGain.gain.value = mpVolume.value / 100 * 0.35;
+    }
+  });
+
+  // Auto-collapse panel on mouse leave
+  mp.addEventListener('mouseleave', () => {
+    setTimeout(() => {
+      if (!mp.matches(':hover')) mp.classList.remove('expanded');
+    }, 300);
+  });
+
 });

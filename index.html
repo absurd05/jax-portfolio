@@ -313,6 +313,22 @@
   <!-- 复制提示 -->
   <div class="toast" id="toast">已复制到剪贴板</div>
 
+  <!-- ============ 音乐播放器 ============ -->
+  <div class="music-player" id="musicPlayer">
+    <canvas class="mp-visualizer" id="mpVisualizer"></canvas>
+    <button class="mp-toggle" id="mpToggle" aria-label="播放音乐">
+      <span class="mp-icon">♪</span>
+    </button>
+    <div class="mp-panel" id="mpPanel">
+      <span class="mp-title">Lo-Fi Ambient</span>
+      <div class="mp-controls">
+        <button class="mp-btn" id="mpPlay">▶</button>
+        <input type="range" class="mp-volume" id="mpVolume" min="0" max="100" value="40" />
+      </div>
+    </div>
+    <div class="mp-glow"></div>
+  </div>
+
   <script src="js/main.js"></script>
 </body>
 </html>
