@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Jax · 罗会光（凌拾四）— 河南科技大学计算机科学与技术学生 / 编程爱好者 / 未来科技风个人网站" />
+  <meta name="keywords" content="Jax,罗会光,凌拾四,河南科技大学,计算机科学,个人网站" />
+  <meta name="author" content="Jax 罗会光" />
+  <meta property="og:title" content="Jax · 凌拾四 | Future Portfolio" />
+  <meta property="og:description" content="河南科技大学 计算机科学与技术 · 编程 / 篮球 / 健身 / 电竞 / 旅游" />
+  <meta property="og:type" content="website" />
+  <title>JAX · 凌拾四 | Future Portfolio</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="css/style.css" />
+  <!-- JS 未加载时的兜底样式 -->
+  <noscript>
+    <style>
+      .loader { display: none !important; }
+      .reveal-up { opacity: 1 !important; transform: none !important; }
+    </style>
+  </noscript>
+</head>
+<body>
+  <!-- 自定义光标 -->
+  <div class="cursor-dot" id="cursorDot"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- 背景：粒子画布 + 网格 + 扫描线 -->
+  <canvas id="bgCanvas" class="bg-canvas"></canvas>
+  <div class="grid-overlay"></div>
+  <div class="scanline"></div>
+
+  <!-- 顶部加载动画 -->
+  <div class="loader" id="loader">
+    <div class="loader-text">
+      <span class="loader-bracket">[</span>
+      <span class="loader-name">JAX</span>
+      <span class="loader-bracket">]</span>
+    </div>
+    <div class="loader-bar"><div class="loader-bar-fill" id="loaderBar"></div></div>
+    <div class="loader-percent" id="loaderPercent">0%</div>
+  </div>
+
+  <!-- 导航栏 -->
+  <nav class="navbar" id="navbar">
+    <a href="#home" class="nav-logo">
+      <span class="logo-bracket">&lt;</span>JAX<span class="logo-cursor">_</span><span class="logo-bracket">/&gt;</span>
+    </a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#home" class="nav-link active" data-num="01">主页</a></li>
+      <li><a href="#about" class="nav-link" data-num="02">关于</a></li>
+      <li><a href="#education" class="nav-link" data-num="03">教育</a></li>
+      <li><a href="#interests" class="nav-link" data-num="04">兴趣</a></li>
+      <li><a href="#contact" class="nav-link" data-num="05">联系</a></li>
+    </ul>
+    <button class="nav-toggle" id="navToggle" aria-label="菜单">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- 侧边导航指示器 -->
+  <div class="side-nav">
+    <a href="#home" class="side-dot active" data-section="home"><span>HOME</span></a>
+    <a href="#about" class="side-dot" data-section="about"><span>ABOUT</span></a>
+    <a href="#education" class="side-dot" data-section="education"><span>EDU</span></a>
+    <a href="#interests" class="side-dot" data-section="interests"><span>HOBBY</span></a>
+    <a href="#contact" class="side-dot" data-section="contact"><span>CONTACT</span></a>
+  </div>
+
+  <main>
+    <!-- ============ HERO ============ -->
+    <section id="home" class="hero">
+      <div class="hero-content">
+        <p class="hero-tag reveal-up">&gt; SYSTEM ONLINE · WELCOME</p>
+        <h1 class="hero-title">
+          <span class="hero-greet reveal-up">你好，我是</span>
+          <span class="hero-name glitch" data-text="罗会光">罗会光</span>
+        </h1>
+        <h2 class="hero-subtitle reveal-up">
+          <span class="type-prefix">$</span>
+          <span class="typed-text" id="typedText"></span>
+          <span class="type-cursor">▋</span>
+        </h2>
+        <p class="hero-desc reveal-up">
+          英文名 <b>Jax</b> · 网名 <b>凌拾四</b><br />
+          河南科技大学 · 信息工程学院 · 计算机科学与技术
+        </p>
+        <div class="hero-cta reveal-up">
+          <a href="#about" class="btn btn-primary">
+            <span>了解我</span>
+            <i class="arrow">→</i>
+          </a>
+          <a href="#contact" class="btn btn-ghost">
+            <span>联系我</span>
+          </a>
+        </div>
+        <div class="hero-stats reveal-up">
+          <div class="stat"><b class="count" data-target="3">0</b><span>年级</span></div>
+          <div class="stat"><b class="count" data-target="5">0</b><span>兴趣领域</span></div>
+          <div class="stat"><b class="count" data-target="∞">∞</b><span>可能</span></div>
+        </div>
+      </div>
+      <div class="scroll-hint">
+        <span>SCROLL</span>
+        <div class="scroll-mouse"><div class="scroll-wheel"></div></div>
+      </div>
+    </section>
+
+    <!-- ============ ABOUT ============ -->
+    <section id="about" class="section">
+      <div class="section-head reveal-up">
+        <span class="section-num">// 02</span>
+        <h2 class="section-title">关于我 <small>About</small></h2>
+      </div>
+      <div class="about-grid">
+        <div class="about-card glass tilt reveal-up">
+          <div class="about-avatar">
+            <div class="avatar-ring"></div>
+            <img src="assets/avatar.jpg" alt="Jax 罗会光" class="avatar-photo" />
+          </div>
+          <div class="about-id">
+            <p class="id-line"><span class="id-key">NAME_CN</span><span class="id-val">罗会光</span></p>
+            <p class="id-line"><span class="id-key">NAME_EN</span><span class="id-val">Jax</span></p>
+            <p class="id-line"><span class="id-key">ALIAS</span><span class="id-val">凌拾四</span></p>
+            <p class="id-line"><span class="id-key">ROLE</span><span class="id-val">Student / Coder</span></p>
+          </div>
+        </div>
+        <div class="about-text reveal-up">
+          <p class="about-lead">
+            我是 <b>罗会光（Jax）</b>，网名 <b>凌拾四</b>，一名热爱代码与创造的计算机科学学生。
+          </p>
+          <p>
+            目前就读于 <b>河南科技大学 信息工程学院</b>，主修 <b>计算机科学与技术</b>，大三在读。
+            我享受把想法变成可运行程序的过程，也相信技术是探索世界的工具。
+          </p>
+          <p>
+            课堂之外，篮球场和健身房是我的充电站，电竞让我保持敏锐，旅行让我看见更大的世界。
+            代码与生活，都在持续迭代。
+          </p>
+          <div class="about-tags">
+            <span class="tag">#编程</span>
+            <span class="tag">#算法</span>
+            <span class="tag">#全栈</span>
+            <span class="tag">#开源</span>
+            <span class="tag">#终身学习</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ EDUCATION ============ -->
+    <section id="education" class="section">
+      <div class="section-head reveal-up">
+        <span class="section-num">// 03</span>
+        <h2 class="section-title">教育背景 <small>Education</small></h2>
+      </div>
+      <div class="timeline">
+        <div class="tl-item reveal-up">
+          <div class="tl-dot"></div>
+          <div class="tl-card glass tilt">
+            <span class="tl-date">2024 — 至今 · 大三</span>
+            <h3 class="tl-title">河南科技大学</h3>
+            <p class="tl-sub">信息工程学院 · 计算机科学与技术</p>
+            <p class="tl-desc">系统学习数据结构、算法、操作系统、计算机网络、数据库等核心课程，持续打磨工程能力与项目实践。</p>
+            <div class="tl-chips">
+              <span>数据结构</span><span>操作系统</span><span>计算机网络</span><span>数据库</span>
+            </div>
+          </div>
+        </div>
+        <div class="tl-item reveal-up">
+          <div class="tl-dot"></div>
+          <div class="tl-card glass tilt">
+            <span class="tl-date">大一 / 大二 · 基础奠基</span>
+            <h3 class="tl-title">专业基础筑基</h3>
+            <p class="tl-sub">C / C++ / Python / 前端</p>
+            <p class="tl-desc">从编程语言基础到小型项目实战，建立计算思维，培养独立解决问题的能力。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ INTERESTS ============ -->
+    <section id="interests" class="section">
+      <div class="section-head reveal-up">
+        <span class="section-num">// 04</span>
+        <h2 class="section-title">兴趣领域 <small>Interests</small></h2>
+      </div>
+      <div class="interest-grid">
+        <article class="interest-card glass tilt reveal-up" data-color="cyan">
+          <div class="ic-icon">&lt;/&gt;</div>
+          <h3>编程</h3>
+          <p>用代码构建世界，从算法到全栈，享受每一次 <code>compile success</code>。</p>
+          <div class="ic-bar"></div>
+        </article>
+        <article class="interest-card glass tilt reveal-up" data-color="magenta">
+          <div class="ic-icon">🏀</div>
+          <h3>篮球</h3>
+          <p>球场上的节奏与对抗，像极了工程：配合、判断、果断出手。</p>
+          <div class="ic-bar"></div>
+        </article>
+        <article class="interest-card glass tilt reveal-up" data-color="green">
+          <div class="ic-icon">💪</div>
+          <h3>健身</h3>
+          <p>每一次推举都是对自己的投资，自律带来自由。</p>
+          <div class="ic-bar"></div>
+        </article>
+        <article class="interest-card glass tilt reveal-up" data-color="amber">
+          <div class="ic-icon">🎮</div>
+          <h3>电竞</h3>
+          <p>反应、决策、团队——虚拟战场上的实时博弈艺术。</p>
+          <div class="ic-bar"></div>
+        </article>
+        <article class="interest-card glass tilt reveal-up" data-color="violet">
+          <div class="ic-icon">✈️</div>
+          <h3>旅游</h3>
+          <p>读万卷书，行万里路。在陌生城市里收集新的坐标与故事。</p>
+          <div class="ic-bar"></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============ CONTACT ============ -->
+    <section id="contact" class="section">
+      <div class="section-head reveal-up">
+        <span class="section-num">// 05</span>
+        <h2 class="section-title">联系我 <small>Contact</small></h2>
+      </div>
+      <div class="contact-wrap">
+        <div class="contact-cta reveal-up">
+          <h3>LET'S<br/>CONNECT.</h3>
+          <p>无论是技术交流、项目合作，还是单纯想聊聊天，欢迎随时找到我。</p>
+        </div>
+        <div class="contact-cards">
+          <a href="mailto:jax.050810@gmail.com" class="contact-card glass tilt reveal-up">
+            <div class="cc-icon">✉</div>
+            <div class="cc-info">
+              <span class="cc-label">EMAIL</span>
+              <span class="cc-value">jax.050810@gmail.com</span>
+            </div>
+            <i class="cc-arrow">↗</i>
+          </a>
+          <div class="contact-card glass tilt reveal-up" id="wechatCard">
+            <div class="cc-icon" style="color:var(--cyan)">微</div>
+            <div class="cc-info">
+              <span class="cc-label">WECHAT</span>
+              <span class="cc-value" id="wechatVal">L_12081014</span>
+            </div>
+            <button class="copy-btn" id="copyWechat" data-copy="L_12081014">复制</button>
+          </div>
+          <a href="#home" class="contact-card glass tilt reveal-up">
+            <div class="cc-icon" style="color:var(--green)">@</div>
+            <div class="cc-info">
+              <span class="cc-label">ALIAS</span>
+              <span class="cc-value">凌拾四 / Jax</span>
+            </div>
+            <i class="cc-arrow">↑</i>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <span class="footer-logo">&lt;JAX/&gt;</span>
+      <p>© <span id="year"></span> 罗会光 Jax · Built with ❤ &amp; code</p>
+      <p class="footer-sub">jax.me.com · Future Edition</p>
+    </div>
+  </footer>
+
+  <!-- 回到顶部 -->
+  <button class="to-top" id="toTop" aria-label="回到顶部">↑</button>
+
+  <!-- 复制提示 -->
+  <div class="toast" id="toast">已复制到剪贴板</div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
