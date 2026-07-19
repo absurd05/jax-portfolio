@@ -248,6 +248,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const rotateY = ((x - centerX) / centerX) * 6;
 
       card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+      // Update glow position for project cards
+      card.style.setProperty('--mx', (x / rect.width * 100) + '%');
+      card.style.setProperty('--my', (y / rect.height * 100) + '%');
     });
     card.addEventListener('mouseleave', () => {
       card.style.transform = 'perspective(800px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
