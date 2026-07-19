@@ -363,6 +363,28 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* ========================================
+     10.4 WECHAT QR MODAL
+     ======================================== */
+  const qrModal = document.getElementById('qrModal');
+  const showQrBtn = document.getElementById('showQrBtn');
+  const qrClose = document.getElementById('qrClose');
+  const qrModalBg = document.getElementById('qrModalBg');
+
+  function openQr() { qrModal.classList.add('open'); }
+  function closeQr() { qrModal.classList.remove('open'); }
+
+  showQrBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    openQr();
+  });
+  qrClose.addEventListener('click', closeQr);
+  qrModalBg.addEventListener('click', closeQr);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && qrModal.classList.contains('open')) closeQr();
+  });
+
+  /* ========================================
      10.5 MESSAGE FORM — Server酱 WeChat Push
      ======================================== */
   const SERVER_KEY = 'SCT380582TOENXFgDOpgWxmDwiidfJuqvN';
@@ -370,20 +392,54 @@ document.addEventListener('DOMContentLoaded', () => {
   const msgStatus = document.getElementById('msgStatus');
   const msgSubmit = document.getElementById('msgSubmit');
 
-  // Counters
+  // Counters — with retry + localStorage cache for reliability
   const visitEl = document.getElementById('visitCount');
   const msgCountEl = document.getElementById('msgCount');
   const COUNTER_BASE = 'https://api.counterapi.dev/v1/jax-portfolio';
+  const COUNTER_API2 = 'https://api.countapi.xyz'; // backup endpoint
 
-  // Load visitor count
-  fetch(`${COUNTER_BASE}/visits/up`)
-    .then(r => r.json()).then(d => { visitEl.textContent = d.count; })
-    .catch(() => { visitEl.textContent = '∞'; });
+  // Show cached value immediately (no flicker)
+  const cachedVisits = localStorage.getItem('jax_visits');
+  const cachedMsgs = localStorage.getItem('jax_msgs');
+  if (cachedVisits) visitEl.textContent = cachedVisits;
+  if (cachedMsgs) msgCountEl.textContent = cachedMsgs;
 
-  // Load message count
-  fetch(`${COUNTER_BASE}/messages`)
-    .then(r => r.json()).then(d => { msgCountEl.textContent = d.count || 0; })
-    .catch(() => { msgCountEl.textContent = '…'; });
+  // Fetch with retry
+  async function fetchWithRetry(url, retries = 2, timeout = 4000) {
+    for (let i = 0; i <= retries; i++) {
+      try {
+        const ctrl = new AbortController();
+        const tid = setTimeout(() => ctrl.abort(), timeout);
+        const r = await fetch(url, { signal: ctrl.signal });
+        clearTimeout(tid);
+        if (r.ok) return await r.json();
+      } catch (e) { /* retry */ }
+      if (i < retries) await new Promise(r => setTimeout(r, 600));
+    }
+    return null;
+  }
+
+  // Load visitor count (increment + display)
+  (async () => {
+    const d = await fetchWithRetry(`${COUNTER_BASE}/visits/up`);
+    if (d && typeof d.count === 'number') {
+      visitEl.textContent = d.count;
+      localStorage.setItem('jax_visits', d.count);
+    } else if (!cachedVisits) {
+      visitEl.textContent = '∞';
+    }
+  })();
+
+  // Load message count (get only, no increment) — trailing slash required
+  (async () => {
+    const d = await fetchWithRetry(`${COUNTER_BASE}/messages/`);
+    if (d && typeof d.count === 'number') {
+      msgCountEl.textContent = d.count;
+      localStorage.setItem('jax_msgs', d.count);
+    } else if (!cachedMsgs) {
+      msgCountEl.textContent = '0';
+    }
+  })();
 
   msgForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -431,10 +487,17 @@ document.addEventListener('DOMContentLoaded', () => {
         msgStatus.textContent = '✅ 留言已送达！若留下联系方式，我会主动联系你';
         msgStatus.className = 'msg-status success';
         msgForm.reset();
-        // Increment message counter
-        fetch(`${COUNTER_BASE}/messages/up`)
-          .then(r => r.json()).then(d => { msgCountEl.textContent = d.count; })
-          .catch(() => {});
+        // Increment message counter + update cache
+        const cd = await fetchWithRetry(`${COUNTER_BASE}/messages/up`);
+        if (cd && typeof cd.count === 'number') {
+          msgCountEl.textContent = cd.count;
+          localStorage.setItem('jax_msgs', cd.count);
+        } else {
+          // API failed: optimistic local increment
+          const cur = parseInt(localStorage.getItem('jax_msgs') || '0', 10) + 1;
+          msgCountEl.textContent = cur;
+          localStorage.setItem('jax_msgs', cur);
+        }
       } else {
         throw new Error(data.message || '发送失败');
       }
@@ -535,7 +598,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateActiveSection();
 
   /* ========================================
-     16. MUSIC PLAYER — Web Audio Ambient Synth
+     16. MUSIC PLAYER — Real MP3 + Spectrum Visualizer
      ======================================== */
   const mp = document.getElementById('musicPlayer');
   const mpToggle = document.getElementById('mpToggle');
@@ -544,13 +607,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const mpPanel = document.getElementById('mpPanel');
   const mpVisCanvas = document.getElementById('mpVisualizer');
   const mpVisCtx = mpVisCanvas.getContext('2d');
+  const bgMusic = document.getElementById('bgMusic');
 
   let audioCtx = null;
-  let masterGain = null;
   let analyser = null;
-  let oscillators = [];
+  let sourceNode = null;
   let isPlaying = false;
   let visAnimId = null;
+  let wasPlayingBeforeHidden = false;
+  let gainNode = null;
 
   // Resize visualizer canvas
   function resizeVis() {
@@ -559,71 +624,39 @@ document.addEventListener('DOMContentLoaded', () => {
     mpVisCanvas.height = rect.height * devicePixelRatio;
   }
 
-  // Create audio graph
-  function createAudio() {
+  // Connect <audio> to Web Audio API for spectrum analysis
+  function connectAudioGraph() {
+    if (audioCtx) return; // already connected
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    masterGain = audioCtx.createGain();
-    masterGain.gain.value = mpVolume.value / 100 * 0.35;
-    masterGain.connect(audioCtx.destination);
+    sourceNode = audioCtx.createMediaElementSource(bgMusic);
+
+    gainNode = audioCtx.createGain();
+    gainNode.gain.value = mpVolume.value / 100;
 
     analyser = audioCtx.createAnalyser();
     analyser.fftSize = 64;
-    analyser.smoothingTimeConstant = 0.8;
-    masterGain.connect(analyser);
+    analyser.smoothingTimeConstant = 0.85;
 
-    // Ambient pad: layered detuned sines
-    const freqs = [
-      { f: 55, gain: 0.06 },   // A1
-      { f: 110, gain: 0.05 },  // A2
-      { f: 164.8, gain: 0.04 },// E3
-      { f: 220, gain: 0.03 },  // A3
-      { f: 277.2, gain: 0.02 },// C#4
-    ];
-
-    freqs.forEach(({ f, gain: g }) => {
-      const osc = audioCtx.createOscillator();
-      osc.type = 'sine';
-      osc.frequency.value = f;
-      osc.detune.value = (Math.random() * 6) - 3;
-
-      const gainNode = audioCtx.createGain();
-      gainNode.gain.value = g;
-
-      // Subtle LFO for movement
-      const lfo = audioCtx.createOscillator();
-      const lfoGain = audioCtx.createGain();
-      lfo.frequency.value = 0.03 + Math.random() * 0.04;
-      lfoGain.gain.value = g * 0.3;
-      lfo.connect(lfoGain);
-      lfoGain.connect(gainNode.gain);
-      lfo.start();
-
-      osc.connect(gainNode);
-      gainNode.connect(masterGain);
-      osc.start();
-
-      oscillators.push({ osc, gain: gainNode, lfo, lfoGain });
-    });
-  }
-
-  function destroyAudio() {
-    oscillators.forEach(({ osc, lfo }) => { try { osc.stop(); lfo.stop(); } catch(e){} });
-    oscillators = [];
-    if (audioCtx) { audioCtx.close(); audioCtx = null; }
-    masterGain = null; analyser = null;
+    sourceNode.connect(gainNode);
+    gainNode.connect(analyser);
+    analyser.connect(audioCtx.destination);
   }
 
   // Toggle play/pause
   function togglePlay() {
     if (isPlaying) {
-      destroyAudio();
+      bgMusic.pause();
       isPlaying = false;
       mp.classList.remove('playing');
       mpPlay.textContent = '▶';
       if (visAnimId) { cancelAnimationFrame(visAnimId); visAnimId = null; }
       mpVisCtx.clearRect(0, 0, mpVisCanvas.width, mpVisCanvas.height);
     } else {
-      createAudio();
+      connectAudioGraph();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      bgMusic.play().catch(err => {
+        console.error('Playback failed:', err);
+      });
       isPlaying = true;
       mp.classList.add('playing');
       mpPlay.textContent = '⏸';
@@ -632,7 +665,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Spectrum visualizer
+  // Spectrum visualizer (reads real audio frequency data)
   function drawVisualizer() {
     if (!isPlaying || !analyser) { visAnimId = null; return; }
 
@@ -666,9 +699,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Button events
   mpToggle.addEventListener('click', () => {
     mp.classList.toggle('expanded');
-    if (mp.classList.contains('expanded')) {
-      resizeVis();
-    }
+    if (mp.classList.contains('expanded')) resizeVis();
   });
 
   mpPlay.addEventListener('click', (e) => {
@@ -677,9 +708,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   mpVolume.addEventListener('input', () => {
-    if (masterGain) {
-      masterGain.gain.value = mpVolume.value / 100 * 0.35;
-    }
+    if (gainNode) gainNode.gain.value = mpVolume.value / 100;
+    bgMusic.volume = mpVolume.value / 100;
   });
 
   // Auto-collapse panel on mouse leave
@@ -687,6 +717,37 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
       if (!mp.matches(':hover')) mp.classList.remove('expanded');
     }, 300);
+  });
+
+  /* ========================================
+     17. AUTO-PAUSE WHEN TAB NOT VISIBLE
+     — 离开网站/切到后台时自动暂停音乐
+     ======================================== */
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      if (isPlaying) {
+        wasPlayingBeforeHidden = true;
+        togglePlay();
+      }
+    } else {
+      if (wasPlayingBeforeHidden) {
+        wasPlayingBeforeHidden = false;
+        togglePlay();
+      }
+    }
+  });
+
+  window.addEventListener('blur', () => {
+    if (isPlaying) {
+      wasPlayingBeforeHidden = true;
+      togglePlay();
+    }
+  });
+  window.addEventListener('focus', () => {
+    if (wasPlayingBeforeHidden && document.visibilityState === 'visible') {
+      wasPlayingBeforeHidden = false;
+      togglePlay();
+    }
   });
 
 });

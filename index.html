@@ -246,6 +246,7 @@
               <span class="cc-value" id="wechatVal">L_12081014</span>
             </div>
             <button class="copy-btn" id="copyWechat" data-copy="L_12081014">复制</button>
+            <button class="copy-btn qr-btn" id="showQrBtn" style="background:rgba(168,85,247,0.1);color:var(--violet);border-color:rgba(168,85,247,0.2)">扫码</button>
           </div>
           <a href="#home" class="contact-card glass tilt reveal-up">
             <div class="cc-icon" style="color:var(--green)">@</div>
@@ -313,6 +314,19 @@
   <!-- 复制提示 -->
   <div class="toast" id="toast">已复制到剪贴板</div>
 
+  <!-- ============ 微信二维码弹窗 ============ -->
+  <div class="qr-modal" id="qrModal">
+    <div class="qr-modal-bg" id="qrModalBg"></div>
+    <div class="qr-modal-box glass">
+      <button class="qr-close" id="qrClose" aria-label="关闭">✕</button>
+      <div class="qr-glow"></div>
+      <img src="assets/wechat-qr.png" alt="微信二维码" class="qr-img" />
+      <p class="qr-title">微信扫码加我</p>
+      <p class="qr-sub">微信号：L_12081014</p>
+      <p class="qr-tip">长按或扫描二维码</p>
+    </div>
+  </div>
+
   <!-- ============ 音乐播放器 ============ -->
   <div class="music-player" id="musicPlayer">
     <canvas class="mp-visualizer" id="mpVisualizer"></canvas>
@@ -320,13 +334,14 @@
       <span class="mp-icon">♪</span>
     </button>
     <div class="mp-panel" id="mpPanel">
-      <span class="mp-title">Lo-Fi Ambient</span>
+      <span class="mp-title">Calm Piano · 治愈钢琴</span>
       <div class="mp-controls">
         <button class="mp-btn" id="mpPlay">▶</button>
-        <input type="range" class="mp-volume" id="mpVolume" min="0" max="100" value="40" />
+        <input type="range" class="mp-volume" id="mpVolume" min="0" max="100" value="50" />
       </div>
     </div>
     <div class="mp-glow"></div>
+    <audio id="bgMusic" src="assets/calm-piano.mp3" loop preload="auto"></audio>
   </div>
 
   <script src="js/main.js"></script>
